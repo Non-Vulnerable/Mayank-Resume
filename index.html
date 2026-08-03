@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mayank Mevada — Offensive Security Consultant</title>
+<meta name="description" content="Portfolio of Mayank Mevada, Senior Security Consultant specializing in VAPT, application security, and red team assessments.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#0A0E12;
+    --panel:#10161C;
+    --panel-raised:#161D25;
+    --line:#232C36;
+    --text:#E6EDF3;
+    --muted:#8B98A5;
+    --amber:#E8A33D;
+    --steel:#4FB0C6;
+    --danger:#D9614F;
+    --mono: 'IBM Plex Mono', ui-monospace, monospace;
+    --sans: 'IBM Plex Sans', -apple-system, sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  @media (prefers-reduced-motion: reduce){
+    html{scroll-behavior:auto;}
+    *{animation-duration:0.001ms !important; transition-duration:0.001ms !important;}
+  }
+  body{
+    background:var(--ink);
+    color:var(--text);
+    font-family:var(--sans);
+    line-height:1.6;
+    overflow-x:hidden;
+  }
+  a{color:var(--steel); text-decoration:none;}
+  a:hover{text-decoration:underline;}
+  a:focus-visible, button:focus-visible{outline:2px solid var(--amber); outline-offset:3px;}
+
+  .wrap{max-width:960px; margin:0 auto; padding:0 24px;}
+
+  /* ---------- background scanline texture ---------- */
+  .grid-bg{
+    position:fixed; inset:0; z-index:0; pointer-events:none;
+    background-image:
+      linear-gradient(rgba(232,163,61,0.035) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(232,163,61,0.035) 1px, transparent 1px);
+    background-size:48px 48px;
+    mask-image:radial-gradient(ellipse 80% 60% at 50% 0%, black 40%, transparent 100%);
+  }
+
+  /* ---------- top bar ---------- */
+  header{
+    position:sticky; top:0; z-index:50;
+    background:rgba(10,14,18,0.88);
+    backdrop-filter:blur(8px);
+    border-bottom:1px solid var(--line);
+  }
+  .nav{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:16px 24px; max-width:960px; margin:0 auto;
+  }
+  .logo{
+    font-family:var(--mono); font-weight:600; font-size:14px;
+    letter-spacing:0.02em; color:var(--text);
+  }
+  .logo span{color:var(--amber);}
+  .navlinks{display:flex; gap:28px; font-family:var(--mono); font-size:12.5px; letter-spacing:0.03em;}
+  .navlinks a{color:var(--muted);}
+  .navlinks a:hover{color:var(--amber); text-decoration:none;}
+  .status{
+    display:flex; align-items:center; gap:6px;
+    font-family:var(--mono); font-size:11px; color:var(--muted);
+  }
+  .dot{width:6px; height:6px; border-radius:50%; background:#4CD37B; animation:pulse 2s infinite;}
+  @keyframes pulse{0%,100%{opacity:1;} 50%{opacity:0.35;}}
+
+  @media (max-width:640px){
+    .navlinks{display:none;}
+  }
+
+  /* ---------- hero ---------- */
+  .hero{
+    position:relative; z-index:1;
+    padding:90px 0 70px;
+    border-bottom:1px solid var(--line);
+  }
+  .eyebrow{
+    font-family:var(--mono); font-size:12px; color:var(--amber);
+    letter-spacing:0.12em; text-transform:uppercase;
+    display:flex; align-items:center; gap:10px; margin-bottom:22px;
+  }
+  .eyebrow::before{content:''; width:22px; height:1px; background:var(--amber);}
+
+  .hero h1{
+    font-family:var(--sans); font-weight:700;
+    font-size:clamp(34px, 6vw, 58px);
+    line-height:1.08; letter-spacing:-0.02em;
+    max-width:11ch;
+  }
+  .hero .role{
+    font-family:var(--mono); color:var(--steel); font-size:clamp(15px,2vw,18px);
+    margin-top:18px; letter-spacing:0.01em;
+  }
+  .hero p.lede{
+    margin-top:22px; max-width:56ch; color:var(--muted); font-size:16px;
+  }
+  .hero-actions{
+    margin-top:34px; display:flex; gap:14px; flex-wrap:wrap;
+  }
+  .btn{
+    font-family:var(--mono); font-size:13px; letter-spacing:0.02em;
+    padding:12px 20px; border-radius:3px; border:1px solid var(--line);
+    color:var(--text); cursor:pointer; background:var(--panel);
+    transition:border-color .18s ease, transform .18s ease;
+    display:inline-flex; align-items:center; gap:8px;
+  }
+  .btn:hover{border-color:var(--amber); text-decoration:none; transform:translateY(-1px);}
+  .btn.primary{background:var(--amber); color:#1A1204; border-color:var(--amber); font-weight:600;}
+  .btn.primary:hover{background:#f0af4d;}
+
+  /* scan reticle signature element */
+  .reticle{
+    position:absolute; top:80px; right:24px;
+    width:130px; height:130px; opacity:0.5;
+    display:none;
+  }
+  @media(min-width:780px){ .reticle{display:block;} }
+  .reticle svg{width:100%; height:100%;}
+  .reticle .ring{
+    transform-origin:65px 65px;
+    animation:spin 14s linear infinite;
+  }
+  @keyframes spin{to{transform:rotate(360deg);}}
+  .reticle .crosshair{stroke:var(--amber); stroke-width:1;}
+  .reticle .arc{stroke:var(--steel); stroke-width:1.4; fill:none;}
+
+  /* ---------- section shell ---------- */
+  section{
+    position:relative; z-index:1;
+    padding:64px 0;
+    border-bottom:1px solid var(--line);
+  }
+  .sec-head{
+    display:flex; align-items:baseline; gap:14px; margin-bottom:34px;
+  }
+  .sec-tag{
+    font-family:var(--mono); font-size:11.5px; color:var(--muted);
+    border:1px solid var(--line); padding:3px 8px; border-radius:2px;
+    white-space:nowrap;
+  }
+  .sec-head h2{
+    font-size:clamp(22px,3vw,28px); font-weight:700; letter-spacing:-0.01em;
+  }
+
+  /* ---------- about / stats ---------- */
+  .about-grid{
+    display:grid; grid-template-columns:1.3fr 1fr; gap:48px;
+  }
+  @media(max-width:720px){ .about-grid{grid-template-columns:1fr;} }
+  .about-grid p{color:var(--muted); margin-bottom:16px; max-width:60ch;}
+  .about-grid strong{color:var(--text); font-weight:600;}
+
+  .stats{
+    display:grid; grid-template-columns:1fr 1fr; gap:1px;
+    background:var(--line); border:1px solid var(--line); border-radius:4px; overflow:hidden;
+    height:fit-content;
+  }
+  .stat{background:var(--panel); padding:20px;}
+  .stat .num{font-family:var(--mono); font-size:26px; font-weight:600; color:var(--amber);}
+  .stat .label{font-size:12px; color:var(--muted); margin-top:4px;}
+
+  /* ---------- experience timeline ---------- */
+  .timeline{border-left:1px solid var(--line); margin-left:6px;}
+  .tl-item{position:relative; padding:0 0 40px 32px;}
+  .tl-item:last-child{padding-bottom:0;}
+  .tl-item::before{
+    content:attr(data-idx);
+    position:absolute; left:-6px; top:2px; transform:translateX(-50%);
+    width:11px; height:11px; border-radius:50%;
+    background:var(--ink); border:2px solid var(--amber);
+  }
+  .tl-item::after{
+    content:attr(data-idx);
+    position:absolute; left:-46px; top:0px;
+    font-family:var(--mono); font-size:11px; color:var(--muted);
+  }
+  .tl-head{display:flex; flex-wrap:wrap; justify-content:space-between; gap:8px; align-items:baseline;}
+  .tl-head h3{font-size:18px; font-weight:600;}
+  .tl-head .tl-date{font-family:var(--mono); font-size:12px; color:var(--steel); white-space:nowrap;}
+  .tl-company{font-family:var(--mono); font-size:12.5px; color:var(--muted); margin-top:3px;}
+  .tl-item ul{margin-top:14px; padding-left:0; list-style:none;}
+  .tl-item li{
+    position:relative; padding-left:18px; margin-bottom:8px;
+    color:var(--muted); font-size:14.5px;
+  }
+  .tl-item li::before{content:'›'; position:absolute; left:0; color:var(--amber);}
+
+  /* ---------- skills ---------- */
+  .skill-cats{display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:1px; background:var(--line); border:1px solid var(--line); border-radius:4px; overflow:hidden;}
+  .skill-cat{background:var(--panel); padding:22px;}
+  .skill-cat h4{font-family:var(--mono); font-size:12px; color:var(--amber); letter-spacing:0.05em; text-transform:uppercase; margin-bottom:14px;}
+  .chip-row{display:flex; flex-wrap:wrap; gap:8px;}
+  .chip{
+    font-family:var(--mono); font-size:12px; color:var(--text);
+    background:var(--panel-raised); border:1px solid var(--line);
+    padding:5px 10px; border-radius:3px;
+  }
+
+  /* ---------- writeups ---------- */
+  .writeups{display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:20px;}
+  .card{
+    background:var(--panel); border:1px solid var(--line); border-radius:4px;
+    padding:24px; transition:border-color .18s ease, transform .18s ease;
+  }
+  .card:hover{border-color:var(--steel); transform:translateY(-2px);}
+  .card .tag{font-family:var(--mono); font-size:10.5px; color:var(--danger); border:1px solid rgba(217,97,79,0.4); padding:2px 7px; border-radius:2px; display:inline-block; margin-bottom:14px;}
+  .card h3{font-size:16px; font-weight:600; margin-bottom:8px;}
+  .card p{font-size:13.5px; color:var(--muted); margin-bottom:14px;}
+  .card .rl{font-family:var(--mono); font-size:12px;}
+
+  /* ---------- certs ---------- */
+  .certs{display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:16px;}
+  .cert{
+    display:flex; align-items:center; gap:14px;
+    background:var(--panel); border:1px solid var(--line); border-radius:4px; padding:18px;
+  }
+  .cert-badge{
+    width:40px; height:40px; flex-shrink:0; border-radius:4px;
+    background:var(--panel-raised); display:flex; align-items:center; justify-content:center;
+    font-family:var(--mono); font-size:11px; color:var(--amber); font-weight:700; border:1px solid var(--line);
+  }
+  .cert h4{font-size:14px; font-weight:600;}
+  .cert p{font-size:12px; color:var(--muted); margin-top:2px;}
+
+  /* ---------- contact ---------- */
+  .contact-box{
+    background:var(--panel); border:1px solid var(--line); border-radius:6px;
+    padding:44px; text-align:center;
+  }
+  .contact-box h2{font-size:clamp(22px,3.4vw,30px); margin-bottom:14px;}
+  .contact-box p{color:var(--muted); max-width:50ch; margin:0 auto 26px;}
+  .contact-links{display:flex; gap:14px; justify-content:center; flex-wrap:wrap;}
+
+  footer{
+    padding:28px 0 40px; text-align:center;
+    font-family:var(--mono); font-size:11.5px; color:var(--muted);
+  }
+</style>
+</head>
+<body>
+
+<div class="grid-bg"></div>
+
+<header>
+  <div class="nav">
+    <div class="logo">MAYANK<span>://</span>MEVADA</div>
+    <nav class="navlinks">
+      <a href="#about">ABOUT</a>
+      <a href="#experience">EXPERIENCE</a>
+      <a href="#skills">TOOLS</a>
+      <a href="#writeups">WRITEUPS</a>
+      <a href="#certs">CERTS</a>
+      <a href="#contact">CONTACT</a>
+    </nav>
+    <div class="status"><span class="dot"></span>AVAILABLE FOR ROLES</div>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <section class="hero" style="border-left:none; border-right:none;">
+    <div class="reticle" aria-hidden="true">
+      <svg viewBox="0 0 130 130">
+        <g class="ring">
+          <circle class="arc" cx="65" cy="65" r="58" stroke-dasharray="60 200"/>
+          <circle class="arc" cx="65" cy="65" r="48" stroke-dasharray="30 260" transform="rotate(120 65 65)"/>
+        </g>
+        <line class="crosshair" x1="65" y1="10" x2="65" y2="30"/>
+        <line class="crosshair" x1="65" y1="100" x2="65" y2="120"/>
+        <line class="crosshair" x1="10" y1="65" x2="30" y2="65"/>
+        <line class="crosshair" x1="100" y1="65" x2="120" y2="65"/>
+        <circle class="crosshair" cx="65" cy="65" r="4" fill="none"/>
+      </svg>
+    </div>
+
+    <div class="eyebrow">SECURITY_CONSULTANT // MUMBAI, IN</div>
+    <h1>Mayank Mevada</h1>
+    <div class="role">Senior Security Consultant — Offensive Security &amp; VAPT</div>
+    <p class="lede">
+      5+ years breaking things on purpose so they don't break for real.
+      I run VAPT, red-team, and application security engagements across
+      web, mobile, API, and infrastructure — from initial recon through
+      client-facing remediation reporting.
+    </p>
+    <div class="hero-actions">
+      <a href="#contact" class="btn primary">Get in touch</a>
+      <a href="#experience" class="btn">View experience ↓</a>
+      <a href="#" class="btn" id="resume-link">Download résumé</a>
+    </div>
+  </section>
+
+  <section id="about">
+    <div class="sec-head">
+      <span class="sec-tag">01</span>
+      <h2>About</h2>
+    </div>
+    <div class="about-grid">
+      <div>
+        <p>
+          I'm a <strong>Senior Security Consultant</strong> based in Mumbai, currently at
+          NuSummit Networks, where I work as Sr. Consultant and Sr. Cyber Resiliency Auditor.
+          Over the past 5+ years I've led <strong>10+ engagements</strong>, secured
+          <strong>600+ applications</strong>, and built vulnerability management processes
+          aligned with OWASP standards.
+        </p>
+        <p>
+          My work spans black-box and grey-box assessments across web, mobile, API, and
+          thick-client applications, plus infrastructure VAPT, firewall rule review, and
+          configuration/compliance auditing. I also mentor junior testers and own
+          end-to-end client communication — scoping, testing, reporting, and remediation
+          closure.
+        </p>
+        <p>
+          Outside client work, I automate recurring parts of the testing workflow to cut
+          turnaround time, and I'm continuously building toward deeper red-team capability.
+        </p>
+      </div>
+      <div class="stats">
+        <div class="stat"><div class="num">5+</div><div class="label">Years in offensive security</div></div>
+        <div class="stat"><div class="num">600+</div><div class="label">Applications secured</div></div>
+        <div class="stat"><div class="num">10+</div><div class="label">Projects led end-to-end</div></div>
+        <div class="stat"><div class="num">40%</div><div class="label">Avg. risk reduction post-remediation</div></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="experience">
+    <div class="sec-head">
+      <span class="sec-tag">02</span>
+      <h2>Experience</h2>
+    </div>
+    <div class="timeline">
+
+      <div class="tl-item" data-idx="04">
+        <div class="tl-head">
+          <h3>Senior Security Consultant — Sr. Cyber Resiliency Auditor</h3>
+          <span class="tl-date">10/2024 — Present</span>
+        </div>
+        <div class="tl-company">NuSummit Networks · Mumbai</div>
+        <ul>
+          <li>Led threat modeling sessions with dev teams, cutting pre-production vulnerabilities by 50%.</li>
+          <li>Ran black-box and grey-box assessments across 100+ web, mobile, API, and thick-client apps, reducing exploitation risk by 40%.</li>
+          <li>Delivered NSE and IRDA cyber resiliency audits across VA, CA, AppSec, firewall, and architecture review domains.</li>
+        </ul>
+      </div>
+
+      <div class="tl-item" data-idx="03">
+        <div class="tl-head">
+          <h3>Senior Cybersecurity Analyst</h3>
+          <span class="tl-date">06/2023 — 10/2024</span>
+        </div>
+        <div class="tl-company">Network Intelligence · Mumbai</div>
+        <ul>
+          <li>Owned full lifecycle execution across multiple concurrent projects; promoted to reporting manager.</li>
+          <li>Led the MRA project vertical and performed manual web and mobile penetration testing.</li>
+          <li>Trained junior testers on pentesting methodology and owned end-to-end client communication through vulnerability closure.</li>
+        </ul>
+      </div>
+
+      <div class="tl-item" data-idx="02">
+        <div class="tl-head">
+          <h3>Senior Security Consultant</h3>
+          <span class="tl-date">02/2021 — 06/2023</span>
+        </div>
+        <div class="tl-company">Talakunchi Networks · Mumbai</div>
+        <ul>
+          <li>Contributed to red-team assessments and managed on-site client engagement.</li>
+          <li>Ran infrastructure, web, API, Android, and iOS penetration testing across internal and external scopes.</li>
+          <li>Delivered firewall rule-based audits, compliance auditing, and detailed client-facing reports.</li>
+        </ul>
+      </div>
+
+      <div class="tl-item" data-idx="01">
+        <div class="tl-head">
+          <h3>Bachelor of Engineering — Computer Science</h3>
+          <span class="tl-date">2016 — 2020</span>
+        </div>
+        <div class="tl-company">Mumbai University</div>
+      </div>
+
+    </div>
+  </section>
+
+  <section id="skills">
+    <div class="sec-head">
+      <span class="sec-tag">03</span>
+      <h2>Tools &amp; Stack</h2>
+    </div>
+    <div class="skill-cats">
+      <div class="skill-cat">
+        <h4>Penetration Testing</h4>
+        <div class="chip-row">
+          <span class="chip">Burp Suite</span><span class="chip">OWASP ZAP</span>
+          <span class="chip">Metasploit</span><span class="chip">SQLMap</span>
+          <span class="chip">Nikto</span><span class="chip">Mimikatz</span>
+          <span class="chip">Acunetix</span><span class="chip">Kali Linux</span>
+          <span class="chip">Postman</span>
+        </div>
+      </div>
+      <div class="skill-cat">
+        <h4>Mobile Pentesting</h4>
+        <div class="chip-row">
+          <span class="chip">MobSF</span><span class="chip">APKTool</span>
+          <span class="chip">dex2jar</span><span class="chip">ADB</span>
+          <span class="chip">JD-GUI</span><span class="chip">Frida</span>
+          <span class="chip">Drozer</span>
+        </div>
+      </div>
+      <div class="skill-cat">
+        <h4>VA / CA</h4>
+        <div class="chip-row">
+          <span class="chip">Nessus</span><span class="chip">Nmap</span>
+        </div>
+      </div>
+      <div class="skill-cat">
+        <h4>Firewall Rule Review</h4>
+        <div class="chip-row">
+          <span class="chip">Excel</span><span class="chip">Manual Checklist</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="writeups">
+    <div class="sec-head">
+      <span class="sec-tag">04</span>
+      <h2>Writeups</h2>
+    </div>
+    <p style="color:var(--muted); margin-bottom:28px; max-width:60ch; font-size:14px;">
+      Lab-based and CTF walkthroughs only — no client data is ever referenced here.
+      Replace these placeholders with your own findings as you publish them.
+    </p>
+    <div class="writeups">
+      <div class="card">
+        <span class="tag">WEB</span>
+        <h3>IDOR to Full Account Takeover — Lab Walkthrough</h3>
+        <p>How a predictable object reference in a test app led to horizontal privilege escalation, and how to catch it.</p>
+        <a class="rl" href="#">Read writeup →</a>
+      </div>
+      <div class="card">
+        <span class="tag">HTB</span>
+        <h3>HackTheBox: [Machine Name] — Full Walkthrough</h3>
+        <p>Recon to root: enumeration approach, the misconfig that mattered, and the privilege escalation path.</p>
+        <a class="rl" href="#">Read writeup →</a>
+      </div>
+      <div class="card">
+        <span class="tag">MOBILE</span>
+        <h3>Insecure Data Storage in a Sample Android App</h3>
+        <p>Using MobSF and manual review to trace how sensitive data leaked through unencrypted local storage.</p>
+        <a class="rl" href="#">Read writeup →</a>
+      </div>
+    </div>
+  </section>
+
+  <section id="certs">
+    <div class="sec-head">
+      <span class="sec-tag">05</span>
+      <h2>Certifications &amp; Recognition</h2>
+    </div>
+    <div class="certs">
+      <div class="cert">
+        <div class="cert-badge">CRT<br>P</div>
+        <div><h4>Certified Red Team Professional</h4><p>Altered Security</p></div>
+      </div>
+      <div class="cert">
+        <div class="cert-badge">CEH<br>v12</div>
+        <div><h4>Certified Ethical Hacker v12</h4><p>EC-Council</p></div>
+      </div>
+      <div class="cert">
+        <div class="cert-badge">★</div>
+        <div><h4>Emerging Champion</h4><p>NuSummit Cybersecurity Limited</p></div>
+      </div>
+      <div class="cert">
+        <div class="cert-badge">★</div>
+        <div><h4>Best Team Award</h4><p>NuSummit Cybersecurity Limited</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="contact" style="border-bottom:none;">
+    <div class="contact-box">
+      <h2>Let's talk security</h2>
+      <p>Open to senior offensive security, VAPT, and red team roles — remote or on-site.</p>
+      <div class="contact-links">
+        <a class="btn primary" href="mailto:mayankmevada65@outlook.com">Email me</a>
+        <a class="btn" href="https://linkedin.com/in/YOUR-LINKEDIN-HANDLE" target="_blank" rel="noopener">LinkedIn</a>
+        <a class="btn" href="https://github.com/YOUR-GITHUB-HANDLE" target="_blank" rel="noopener">GitHub</a>
+        <a class="btn" href="https://tryhackme.com/p/YOUR-HANDLE" target="_blank" rel="noopener">TryHackMe</a>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  © <span id="year"></span> Mayank Mevada — Built with plain HTML/CSS, hosted free on GitHub Pages.
+</footer>
+
+<script>
+  document.getElementById('year').textContent = new Date().getFullYear();
+</script>
+
+</body>
+</html>
